@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Tetris</title>
+        <style>
+            body {
+                background: #ddf5ff;
+            }
+            #container {
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body onload="init()">
+        <div id="container">
+            <canvas id="cvs"></canvas>
+        </div>
+        <script>
+            //ブロック1マスの大きさ
+            const blockSize = 30;
+            //ボードサイズ
+            const boardRow = 20;
+            const boardCol = 10;
+            //キャンバスの取得
+            const cvs = document.getElementById("cvs");
+            //2D Contextの取得
+            const ctx = cvs.getContext("2d");
+            //キャンバスサイズ
+            const canvasW = blockSize * boardCol;
+            const canvasH = blockSize * boardRow;
+            cvs.width = canvasW;
+            cvs.height = canvasH;
+            //コンテナの設定
+            const container = document.getElementById("container");
+            container.style.width = canvasW + 'px';
+
+            //ミノの1辺の大きさ
+            const minoSize = 4;
+            //T型のミノ
+            let mino = [
+                [0, 0, 0, 0],
+                [0, 1, 0, 0],
+                [1, 1, 1, 0],
+                [0, 0, 0, 0]
+            ];
+
+            //描画処理
+            const draw = () => {
+                //黒色で塗る
+                ctx.fillStyle = '#000';
+                //キャンバスを塗りつぶす
+                ctx.fillRect(0, 0, canvasW, canvasH);
+
+                //赤四角の描画
+                ctx.fillStyle = "#f00";
+                ctx.fillRect(150, 150, blockSize, blockSize);
+
+                //ミノの描画
+                for (let y = 0; y < minoSize; y++) {
+                    for (let x = 0; x < minoSize; x++) {
+                        if (mino[y][x]) {
+                            ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                        }
+                    }
+                }
+            }
+            //初期化処理
+            const init = () => {
+                draw();
+            }
+        </script>
+    </body>
+</html>
