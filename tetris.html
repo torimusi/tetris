@@ -49,12 +49,24 @@
             let offsetX = 0;
             let offsetY = 0;
 
+            //ボード本体
+            const board = [];
+
             //描画処理
             const draw = () => {
                 //黒色で塗る
                 ctx.fillStyle = '#000';
                 //キャンバスを塗りつぶす
                 ctx.fillRect(0, 0, canvasW, canvasH);
+
+                //ボードに存在しているブロックを塗る
+                for (let y = 0; y < boardRow; y++) {
+                    for (let x = 0; x < boardCol; x++) {
+                        if (board[y][x]) { //board[x][y] != 0
+                            drawBlock(x, y);
+                        }
+                    }
+                }
 
                 //ミノの描画
                 for (let y = 0; y < minoSize; y++) {
@@ -79,25 +91,73 @@
                 ctx.strokeRect(px, py, blockSize, blockSize);
             }
 
+            //押下された方向に移動できるかを判定
+            const canMove = (dx, dy, nowMino = mino) => { //3つ目の引数がない時のためにminoをデフォルト引数に設定
+                for (let y = 0; y < minoSize; y++) {
+                    for (let x = 0; x < minoSize; x++) {
+                        if (nowMino[y][x]) { //その場所にブロックがある場合
+                            //ボード座標に変換
+                            let nx = offsetX + x + dx;
+                            let ny = offsetY + y + dy;
+                            if (ny < 0 || nx < 0 || ny >= boardRow || nx >= boardCol || //調べる座標がボード外の場合
+                                board[ny][nx]) { //移動したいボード上の場所に既に存在している場合
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            };
+
+            //回転
+            const createRotateMino = () => {
+                //新しいミノを作る
+                let newMino = [];
+                for (let y = 0; y < minoSize; y++) {
+                    newMino[y] = [];
+                    for (let x = 0; x < minoSize; x++) {
+                        //時計回りに90度回転させる
+                        newMino[y][x] = mino[minoSize - 1 - x][y];
+                    }
+                }
+                return newMino;
+            };
+
             document.onkeydown = (e) => {
                 switch (e.keyCode) {
                     case 37: //左
-                        offsetX--;
+                        if (canMove(-1, 0)) offsetX--;
                         break;
                     case 38: //上
-                        offsetY--;
+                        if (canMove(0, -1)) offsetY--;
                         break;
                     case 39: //右
-                        offsetX++;
+                        if (canMove(1, 0)) offsetX++;
                         break;
                     case 40: //下
-                        offsetY++;
+                        if (canMove(0, 1)) offsetY++;
                         break;
+                    case 32: //space
+                        let newMino = createRotateMino();
+                        if (canMove(0, 0, newMino)) { //90度回転したミノが問題ない場合
+                            mino = newMino;
+                        }
                 }
                 draw();
             };
+
             //初期化処理
             const init = () => {
+                //20 * 10のサイズのボードを0（黒）で埋める
+                for (let y = 0; y < boardRow; y++) {
+                    board[y] = []; //中身が空になる
+                    for (let x = 0; x < boardCol; x++) {
+                        board[y][x] = 0;
+                    }
+                }
+                //テスト
+                board[3][5] = 1;
+
                 draw();
             }
         </script>
