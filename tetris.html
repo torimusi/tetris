@@ -39,13 +39,69 @@
 
             //ミノの1辺の大きさ
             const minoSize = 4;
-            //T型のミノ
-            let mino = [
-                [0, 0, 0, 0],
-                [0, 1, 0, 0],
-                [1, 1, 1, 0],
-                [0, 0, 0, 0]
+            //ミノの種類
+            const minoTypes = [
+                [], //最初の要素を空としておく
+                [
+                    [0, 0, 0, 0],
+                    [0, 1, 1, 0],
+                    [0, 1, 1, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [1, 1, 0, 0],
+                    [0, 1, 1, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [0, 0, 1, 1],
+                    [0, 1, 1, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [1, 1, 1, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 0],
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [0, 0, 1, 0],
+                    [1, 1, 1, 0],
+                    [0, 0, 0, 0],
+                ],
             ];
+
+            //ミノの色
+            const minoColors = [
+                '', //最初は空
+                '#f6fe85',
+                '#07e0e7',
+                '#7ced77',
+                '#f78ff0',
+                '#f94246',
+                '#9693fe',
+                '#f2b907',
+            ];
+
+            //ミノのindex
+            let mino_idx;
+            //選択されたミノ
+            let mino;
 
             //ミノのオフセット量（何マス分ズレているか）
             let offsetX = 0;
@@ -68,7 +124,7 @@
                 for (let y = 0; y < boardRow; y++) {
                     for (let x = 0; x < boardCol; x++) {
                         if (board[y][x]) { //board[x][y] != 0
-                            drawBlock(x, y);
+                            drawBlock(x, y, board[y][x]);
                         }
                     }
                 }
@@ -77,18 +133,18 @@
                 for (let y = 0; y < minoSize; y++) {
                     for (let x = 0; x < minoSize; x++) {
                         if (mino[y][x]) {
-                            drawBlock(offsetX + x, offsetY + y);
+                            drawBlock(offsetX + x, offsetY + y, mino_idx);
                         }
                     }
                 }
             };
 
             //ブロック一つを描画する
-            const drawBlock = (x, y) => {
+            const drawBlock = (x, y, mino_idx) => {
                 let px = x * blockSize;
                 let py = y * blockSize;
                 //塗りを設定
-                ctx.fillStyle = '#f00';
+                ctx.fillStyle = minoColors[mino_idx];
                 ctx.fillRect(px, py, blockSize, blockSize);
                 //線を設定
                 ctx.strokeStyle = 'black';
@@ -157,7 +213,7 @@
                     for (let x = 0; x < minoSize; x++) {
                         if (mino[y][x]) {
                             //ボードに書き込む
-                            board[offsetY + y][offsetX + x] = 1;
+                            board[offsetY + y][offsetX + x] = mino_idx;
                         }
                     }
                 }
@@ -199,6 +255,9 @@
                     fixMino();
                     //揃ったラインがあれば消去
                     clearLine();
+                    //ミノの抽選
+                    mino_idx = randomIdx();
+                    mino = minoTypes[mino_idx];
                     //初期位置に戻す
                     initStartPos();
                 }
@@ -211,6 +270,11 @@
                 offsetY = 0;
             };
 
+            //ミノのindexの抽選
+            const randomIdx = () => {
+                return Math.floor(Math.random() * (minoTypes.length - 1)) + 1;
+            };
+
             //初期化処理
             const init = () => {
                 //20 * 10のサイズのボードを0（黒）で埋める
@@ -220,6 +284,10 @@
                         board[y][x] = 0;
                     }
                 }
+
+                //最初のミノの抽選
+                mino_idx = randomIdx();
+                mino = minoTypes[mino_idx];
 
                 initStartPos();
                 //自動落下
