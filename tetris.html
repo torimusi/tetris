@@ -113,6 +113,9 @@
             //タイマーID
             let timerId = NaN;
 
+            //ゲームオーバーフラグ
+            isGameOver = false;
+
             //描画処理
             const draw = () => {
                 //黒色で塗る
@@ -136,6 +139,17 @@
                             drawBlock(offsetX + x, offsetY + y, mino_idx);
                         }
                     }
+                }
+
+                //ゲームオーバー処理
+                if (isGameOver) {
+                    const s = 'GAME OVER';
+                    ctx.font = "40px 'MS ゴシック'";
+                    const w = ctx.measureText(s).width;
+                    const x = canvasW / 2 - w / 2;
+                    const y = canvasH / 2 - 20;
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(s, x, y);
                 }
             };
 
@@ -185,6 +199,7 @@
             };
 
             document.onkeydown = (e) => {
+                if (isGameOver) return; //キーでミノが動かないようにする
                 switch (e.keyCode) {
                     case 37: //左
                         if (canMove(-1, 0)) offsetX--;
@@ -247,6 +262,7 @@
 
             //繰り返し行われる落下処理
             const dropMino = () => {
+                if (isGameOver) return;
                 if (canMove(0, 1)) {//下に移動可能なら
                     //下に移動
                     offsetY++;
@@ -260,6 +276,11 @@
                     mino = minoTypes[mino_idx];
                     //初期位置に戻す
                     initStartPos();
+                    //次のミノを出せない場合はGameOver
+                    if (!canMove(0, 0)) {
+                        isGameOver = true;
+                        clearInterval(timerId); //setInterval処理を止める
+                    }
                 }
                 draw();
             };
