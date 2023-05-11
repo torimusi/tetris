@@ -17,6 +17,8 @@
             <canvas id="cvs"></canvas>
         </div>
         <script>
+            //落下サイクル（小さい方が速い）
+            const speed = 300;
             //ブロック1マスの大きさ
             const blockSize = 30;
             //ボードサイズ
@@ -51,6 +53,9 @@
 
             //ボード本体
             const board = [];
+
+            //タイマーID
+            let timerId = NaN;
 
             //描画処理
             const draw = () => {
@@ -89,7 +94,7 @@
                 ctx.strokeStyle = 'black';
                 //線を描画
                 ctx.strokeRect(px, py, blockSize, blockSize);
-            }
+            };
 
             //押下された方向に移動できるかを判定
             const canMove = (dx, dy, nowMino = mino) => { //3つ目の引数がない時のためにminoをデフォルト引数に設定
@@ -146,6 +151,38 @@
                 draw();
             };
 
+            //止まったミノをボード座標に書き込む
+            const fixMino = () => {
+                for (let y = 0; y < minoSize; y++) {
+                    for (let x = 0; x < minoSize; x++) {
+                        if (mino[y][x]) {
+                            //ボードに書き込む
+                            board[offsetY + y][offsetX + x] = 1;
+                        }
+                    }
+                }
+            };
+
+            //繰り返し行われる落下処理
+            const dropMino = () => {
+                if (canMove(0, 1)) {//下に移動可能なら
+                    //下に移動
+                    offsetY++;
+                } else {
+                    //下に移動できない場合は固定
+                    fixMino();
+                    //初期位置に戻す
+                    initStartPos();
+                }
+                draw();
+            };
+
+            //ミノの出現ポイントを設定
+            const initStartPos = () => {
+                offsetX = boardCol / 2 - minoSize / 2;
+                offsetY = 0;
+            };
+
             //初期化処理
             const init = () => {
                 //20 * 10のサイズのボードを0（黒）で埋める
@@ -155,11 +192,13 @@
                         board[y][x] = 0;
                     }
                 }
-                //テスト
-                board[3][5] = 1;
+
+                initStartPos();
+                //自動落下
+                timerId = setInterval(dropMino, speed);
 
                 draw();
-            }
+            };
         </script>
     </body>
 </html>
